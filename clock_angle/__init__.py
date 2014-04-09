@@ -2,13 +2,7 @@
 # -*- coding:utf-8 -*-
 __author__ = 'litleleprikon'
 
+"""clock_angle
 
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt as ex:
-        print("Keyboard interrupt")
+Module that calculate angle between hour and minute arrows on clock
+"""
