@@ -3,10 +3,10 @@
 __author__ = 'litleleprikon'
 
 
-import multiprocessing
+from multiprocessing import Pool, Queue
+from functools import partial
 import re
 from os import path
-import stemming
 
 
 def timeit(func):
@@ -39,7 +39,7 @@ def file_chooser():
     """
     while True:
         # file_path = input("Введите путь к входному файлу\n")
-        file_path = r"D:\Documents\Projects\TestTaskYandex\text_parser\res\Lorem ipsum.txt"  # TODO REMOVE!!!!
+        file_path = r"F:\GitHub\TestTaskYandex\text_parser\res\1984.txt"  # TODO REMOVE!!!!
         if path.exists(file_path):
             if path.isfile(file_path):
                 return open(file_path, 'r')
@@ -56,15 +56,30 @@ class TextParser:
         word_splitter = re.compile(r"\b[,.?!-]*\W+\b")
         sentences_list = sentence_splitter.split(self.text)
         words_appearance = {}
-        for sentence_num, sentence in enumerate(sentences_list):
-            words_list = word_splitter.split(self.text.lower())
-            for word in words_list:
-                if word in words_appearance.keys():
-                    if not sentence_num in words_appearance[word]:
-                        words_appearance[word].append(sentence_num)
-                else:
-                    words_appearance[word] = [int(sentence_num)]
+
+        q = Queue()
+        worker = partial(TextParser.sentence_parser, re_pattern=word_splitter, queue=q)
+
+        Pool(processes=6).starmap(worker, enumerate(sentences_list))
+
+        # for sentence_num, sentence in enumerate(sentences_list):
+        #     words_list = word_splitter.split(self.text.lower())
+        #     for word in words_list:
+        #         if word in words_appearance.keys():
+        #             if not sentence_num in words_appearance[word]:
+        #                 words_appearance[word].append(sentence_num)
+        #         else:
+        #             words_appearance[word] = [int(sentence_num)]
         print()
+
+    @staticmethod
+    def sentence_parser(re_pattern, queue, sentence):
+        sentence_num = sentence[0]
+        sentence = sentence[1]
+        words_list = re_pattern.split(sentence)
+        for word in words_list:
+            queue.put([sentence_num, word])
+
 
 
 class Searcher:
