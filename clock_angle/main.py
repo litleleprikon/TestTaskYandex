@@ -15,7 +15,7 @@ t - тип часов, может быть m - механические или q
 class QueryParser:
     """
         Class, that parse string and define programm parameters.
-        @param parse_string string like "hh:mm" out t' that should be parsed.
+        @param parse_string: string like "hh:mm" out t' that should be parsed.
 
         >>> qp = QueryParser('"03:00" deg m')
         >>> qp.hours
@@ -118,9 +118,9 @@ class Mathematician:
             return
         elif out_type == 'dms':
             degrees = self.result_angle % 1
-            min, sec = divmod(self.result_angle*3600, 60)
-            deg, min = divmod(min, 60)
-            self.result_angle = "{d:.0f}.{m:.0f}'{s:.0f}''".format(d=deg, m=min, s=sec)
+            mnt, sec = divmod(self.result_angle*3600, 60)
+            deg, mnt = divmod(mnt, 60)
+            self.result_angle = "{d:.0f}.{m:.0f}'{s:.0f}''".format(d=deg, m=mnt, s=sec)
         else:
             raise Exception("Формат вывода результата неверен!")
 
