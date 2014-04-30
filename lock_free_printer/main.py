@@ -17,18 +17,20 @@ def main():
     while True:
         query_parser = re.compile(r"(\d+(.\d+)?) (.+)")
         lock = Lock()
-
-        query = raw_input("Please input delay and text or 'exit' to exit.\n")
+        with lock:
+            query = raw_input("Please input delay and text or 'exit' to exit.\n")
         if query.lower().strip() == 'exit':
+            print('Goodbye!\n')
             return
         checked_params = query_parser.search(query)
-        if checked_params is None:
-            raise Exception("Bad string. string must be like '1.2 text'.\n")
-        params = checked_params.groups()
-        delay = float(params[0])
+        if checked_params is not None:
+            params = checked_params.groups()
+            delay = float(params[0])
 
-        text = params[-1]
-        Process(target=waiting_func, args=(delay, text, lock)).start()
+            text = params[-1]
+            Process(target=waiting_func, args=(delay, text, lock)).start()
+        else:
+            print("Bad string. string must be like '1.2 text'.\n")
 
 
 if __name__ == "__main__":
@@ -36,5 +38,3 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt as ex:
         print("Goodbye!\n")
-    except Exception as ex:
-        print(ex.message)
