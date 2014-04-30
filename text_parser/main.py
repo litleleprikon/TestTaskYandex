@@ -48,51 +48,60 @@ def file_chooser():
 
 class TextParser:
     def __init__(self, input_file):
-        self.result = None
+        self.result_dict = dict()
 
         self.text = input_file.read()
 
-        sentence_splitter = re.compile(r"([.!?]\W*)|\n+")
+        # sentence_splitter = re.compile(r"(\S.+?[.!?])(?=\s+|$)")
+        sentence_splitter = re.compile(r"([.!?]\W*)|[\n\t]+")
         word_splitter = re.compile(r"\b[,.?!-]*\W+\b")
-        sentences_list = sentence_splitter.split(self.text)
-        words_appearance = {}
+        self.sentences_list = sentence_splitter.split(self.text)
 
-        q = Queue()
-        worker = partial(TextParser.sentence_parser, re_pattern=word_splitter, queue=q)
+        for i in enumerate(self.sentences_list):
+            self.result_callback(TextParser.sentence_parser(word_splitter, i))
 
-        Pool(processes=6).starmap(worker, enumerate(sentences_list))
+        print("1")
 
-        # for sentence_num, sentence in enumerate(sentences_list):
-        #     words_list = word_splitter.split(self.text.lower())
-        #     for word in words_list:
-        #         if word in words_appearance.keys():
-        #             if not sentence_num in words_appearance[word]:
-        #                 words_appearance[word].append(sentence_num)
-        #         else:
-        #             words_appearance[word] = [int(sentence_num)]
-        print()
+    def result_callback(self, result_pairs):
+        for key, value in result_pairs:
+            if key in self.result_dict.keys():
+                self.result_dict[key].append(value)
+            else:
+                self.result_dict[key] = [value]
 
     @staticmethod
-    def sentence_parser(re_pattern, queue, sentence):
+    def sentence_parser(re_pattern, sentence):
         sentence_num = sentence[0]
         sentence = sentence[1]
         words_list = re_pattern.split(sentence)
+        res = []
         for word in words_list:
-            queue.put([sentence_num, word])
-
+            res.append((word, sentence_num))
+        return res
 
 
 class Searcher:
     def __init__(self, parsed_dic):
-        self.result = None
+        words_list = input("Введите поисковые слова через пробел\n").lower().split()
+        a = set(parsed_dic[words_list.pop()])
+        for word in words_list:
+            try:
+                b = set(parsed_dic[word])
+                a = a & b
+            except KeyError:
+                print("Слова '{w:s}' нет в тексте, поиск окончен".format(w=word))
+                return
+        self.result = list(a)
 
 
 def main():
     try:
         input_file = file_chooser()
-        parsed = TextParser(input_file).result
+        parser = TextParser(input_file)
+        parsed = parser.result_dict
         result = Searcher(parsed).result
-        print(result)
+        for s in list(result):
+            print(parser.sentences_list[s])
     except Exception as ex:
         print(ex)
 
