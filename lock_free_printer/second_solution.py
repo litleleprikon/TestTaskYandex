@@ -1,16 +1,31 @@
-import time
-import argparse
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+__author__ = 'litleleprikon'
 
-def create_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", default=1.0)
-    parser.add_argument("-t", default='Hello')
-    return parser
+import re
+import subprocess
 
-parser = create_parser()
-namespace = parser.parse_args()
 
-print(namespace.s, namespace.t)
+def main():
+    while True:
+        query_parser = re.compile(r"(\d+(.\d+)?) (.+)")
+        query = raw_input("Please input delay and text or 'exit' to exit.\n")
+        if query.lower().strip() == 'exit':
+            print('\nGoodbye!\n')
+            return
+        checked_params = query_parser.search(query)
+        if checked_params is not None:
+            params = checked_params.groups()
+            delay = float(params[0])
 
-time.sleep(float(namespace.s))
-print(namespace.t)
+            text = params[-1]
+            subprocess.Popen('python printer.py -s {0:f} -t "{1:s}"'.format(delay, text), shell=True)
+        else:
+            print("Bad string. string must be like '1.2 text'.\n")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt as ex:
+        print("\nGoodbye!\n")
