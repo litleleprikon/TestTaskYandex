@@ -8,9 +8,9 @@ from time import sleep
 
 
 def waiting_func(delay, text, lock):
+    sleep(delay)
     with lock:
-        sleep(delay)
-        print(text)
+        print('\n{0:s}\n'.format(text))
 
 
 def main():
