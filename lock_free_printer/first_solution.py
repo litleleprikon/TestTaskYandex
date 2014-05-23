@@ -22,15 +22,6 @@ def waiting_func(delay, text):
             yield
 
 
-def idle_work():
-    global last_work_time
-    now = time.time()
-    # do some other stuff every 2 seconds of idleness
-    if now - last_work_time > 2:
-        print('Idle for too long; doing some other stuff.')
-        last_work_time = now
-
-
 def main_loop():
     query_parser = re.compile(r"(\d+(.\d+)?) (.+)")
     read_list = [sys.stdin]
@@ -50,7 +41,11 @@ def main_loop():
                     checked_params = query_parser.search(line)
                     if checked_params is not None:
                         params = checked_params.groups()
-                        delay = float(params[0])
+                        try:
+                            delay = float(params[0])
+                        except ValueError:
+                            print("\nBad delay value\nDelay is equal 1.0\n")
+                            delay = 1.0
                         text = params[-1]
                         waitors.append(waiting_func(delay, text))
                         print("Please input delay and text or 'exit' to exit.\n")
